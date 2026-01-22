@@ -16,12 +16,39 @@ export default function ProductGrid() {
 
   const API_URL = import.meta.env.VITE_API_URL || "https://api.appconnect.cloud";
 
+  // ✅ MinIO public access (use HTTPS)
+  const MINIO_PUBLIC_URL =
+    import.meta.env.VITE_MINIO_PUBLIC_URL || "https://minio.appconnect.cloud";
+  const MINIO_BUCKET =
+    import.meta.env.VITE_MINIO_BUCKET || "vitalimes-images";
+
+  // ✅ Convert DB value -> correct public MinIO URL
+  const toImageUrl = (filename) => {
+    if (!filename) return "";
+
+    let key = String(filename).trim();
+
+    // If DB already stored full URL, use it
+    if (key.startsWith("http://") || key.startsWith("https://")) {
+      return key;
+    }
+
+    // Remove leading uploads/ if present
+    key = key.replace(/^uploads\//, "");
+
+    // Encode safely
+    key = key.split("/").map(encodeURIComponent).join("/");
+
+    // Your objects are under: vitalimes-images/uploads/<file>
+    return `${MINIO_PUBLIC_URL}/${MINIO_BUCKET}/uploads/${key}`;
+  };
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await axios.get(`${API_URL}/api/products?status=Active`);
         if (res.data.success && Array.isArray(res.data.products)) {
-          setProducts(res.data.products.slice(0, 6)); // show more products
+          setProducts(res.data.products.slice(0, 6));
         }
       } catch (err) {
         console.error("Product fetch error:", err);
@@ -31,7 +58,7 @@ export default function ProductGrid() {
     };
 
     fetchProducts();
-  }, []);
+  }, [API_URL]);
 
   if (loading) {
     return (
@@ -57,6 +84,10 @@ export default function ProductGrid() {
         {products.map((product) => {
           const firstVariant = product.variants?.[0];
 
+          const img1 = toImageUrl(product.image1);
+          const img2 = toImageUrl(product.image2 || product.image1);
+          const img3 = toImageUrl(product.image3 || product.image1);
+
           return (
             <Col
               key={product.id}
@@ -69,14 +100,17 @@ export default function ProductGrid() {
               <div style={cardWrapperStyle}>
                 <ProductCard
                   product={{
+                    id: product.id,
                     name: product.title,
-                    price: firstVariant?.sale_price || firstVariant?.price || 0,
+                    price: firstVariant?.price || 0,
+                    sale_price: firstVariant?.sale_price ?? null,
                     rating: 5,
-                    imageFront: `${API_URL}/uploads/${product.image1}`,
-                    imageMiddle: `${API_URL}/uploads/${product.image2 || product.image1}`,
-                    imageBack: `${API_URL}/uploads/${product.image3 || product.image1}`,
+
+                    // ✅ Pass MinIO URLs
+                    image_url: img1,
+                    image_url2: img2,
+                    image_url3: img3,
                   }}
-                  apiUrl={API_URL}
                 />
               </div>
             </Col>
