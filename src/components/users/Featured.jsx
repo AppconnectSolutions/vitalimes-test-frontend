@@ -11,7 +11,7 @@ export default function Featured() {
 
   // MinIO public bucket config
   const MINIO_PUBLIC_URL =
-    import.meta.env.VITE_MINIO_PUBLIC_URL || "http://minio.appconnect.cloud";
+    import.meta.env.VITE_MINIO_PUBLIC_URL || "https://minio.appconnect.cloud";
   const MINIO_BUCKET =
     import.meta.env.VITE_MINIO_BUCKET || "vitalimes-images";
 
