@@ -7,40 +7,34 @@ export default function ProductGrid() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const cardWrapperStyle = {
-    width: "100%",
-    padding: "10px",
-    display: "flex",
-    justifyContent: "center",
-  };
+  const API_URL =
+    import.meta.env.VITE_API_URL || "https://api.appconnect.cloud";
 
-  const API_URL = import.meta.env.VITE_API_URL || "https://api.appconnect.cloud";
-
-  // ✅ MinIO public access (use HTTPS)
   const MINIO_PUBLIC_URL =
     import.meta.env.VITE_MINIO_PUBLIC_URL || "https://minio.appconnect.cloud";
   const MINIO_BUCKET =
     import.meta.env.VITE_MINIO_BUCKET || "vitalimes-images";
 
-  // ✅ Convert DB value -> correct public MinIO URL
+  // ✅ SAME safe normalizer
   const toImageUrl = (filename) => {
     if (!filename) return "";
 
     let key = String(filename).trim();
 
-    // If DB already stored full URL, use it
-    if (key.startsWith("http://") || key.startsWith("https://")) {
-      return key;
+    key = key.replace(/^https?:\/\/[^/]+\/+/i, "");
+    key = key.replace(/^\/+/, "");
+
+    if (key.startsWith(`${MINIO_BUCKET}/`)) {
+      key = key.slice(MINIO_BUCKET.length + 1);
     }
 
-    // Remove leading uploads/ if present
-    key = key.replace(/^uploads\//, "");
+    if (!key.startsWith("uploads/")) {
+      key = `uploads/${key}`;
+    }
 
-    // Encode safely
     key = key.split("/").map(encodeURIComponent).join("/");
 
-    // Your objects are under: vitalimes-images/uploads/<file>
-    return `${MINIO_PUBLIC_URL}/${MINIO_BUCKET}/uploads/${key}`;
+    return `${MINIO_PUBLIC_URL}/${MINIO_BUCKET}/${key}`;
   };
 
   useEffect(() => {
@@ -84,10 +78,6 @@ export default function ProductGrid() {
         {products.map((product) => {
           const firstVariant = product.variants?.[0];
 
-          const img1 = toImageUrl(product.image1);
-          const img2 = toImageUrl(product.image2 || product.image1);
-          const img3 = toImageUrl(product.image3 || product.image1);
-
           return (
             <Col
               key={product.id}
@@ -97,22 +87,18 @@ export default function ProductGrid() {
               lg={4}
               className="d-flex justify-content-center"
             >
-              <div style={cardWrapperStyle}>
-                <ProductCard
-                  product={{
-                    id: product.id,
-                    name: product.title,
-                    price: firstVariant?.price || 0,
-                    sale_price: firstVariant?.sale_price ?? null,
-                    rating: 5,
-
-                    // ✅ Pass MinIO URLs
-                    image_url: img1,
-                    image_url2: img2,
-                    image_url3: img3,
-                  }}
-                />
-              </div>
+              <ProductCard
+                product={{
+                  id: product.id,
+                  name: product.title,
+                  price: firstVariant?.price || 0,
+                  sale_price: firstVariant?.sale_price ?? null,
+                  rating: 5,
+                  image_url: toImageUrl(product.image1),
+                  image_url2: toImageUrl(product.image2 || product.image1),
+                  image_url3: toImageUrl(product.image3 || product.image1),
+                }}
+              />
             </Col>
           );
         })}
