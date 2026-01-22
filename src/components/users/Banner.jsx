@@ -25,7 +25,7 @@ export default function Banner() {
       pos: { top: "15%", right: "6%", textAlign: "right", width: "40%" }
     },
     {
-      img: "https://appconnect.cloud/uploads/bg_4.png",
+      img: "/assets/images/bg_4.png",
       title: "Sip the Sun. Taste the Zest.",
       sub: "Cool Down with Pure Lemon Bliss",
       pos: { top: "28%", right: "6%", textAlign: "right", width: "40%" }
@@ -37,7 +37,7 @@ export default function Banner() {
       pos: { top: "22%", right: "6%", textAlign: "right", width: "40%" }
     },
     {
-      img: "https://appconnect.cloud/uploads/bg_6.png",
+      img: "/assets/images/bg_6.png",
       title: "Crafted by Nature, Loved by You",
       sub: "Pure Lemon Essential Oil Wellness",
 pos: { 
