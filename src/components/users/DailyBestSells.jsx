@@ -59,28 +59,28 @@ export default function DailyBestSells() {
       rating: 4.5,
     },
 
-    {
-      img: "https://appconnect.cloud/uploads/Black_lemon_dry.png",
-      title: "Black Lemon",
-      description: [
-        "Dried black lemons for recipes",
-        "✔ High antioxidant",
-        "✔ Natural smoky sourness",
-      ],
-      rating: 4.5,
-    },
+   {
+    img: `${base}/assets/new/Black_lemon_dry.png`, // ✅ FIXED
+    title: "Black Lemon",
+    description: [
+      "Dried black lemons for recipes",
+      "✔ High antioxidant",
+      "✔ Natural smoky sourness",
+    ],
+    rating: 4.5,
+  },
 
-    {
-      img: "https://appconnect.cloud/uploads/Lemon_seed_powder.png",
-      title: "Lemon Seed Powder",
-      description: [
-        "A natural source of lemon seed powder",
-        "✔ Natural exfoliant",
-        "✔ Removes dead skin",
-        "✔ Chemical scrub safe alternative",
-      ],
-      rating: 4.5,
-    },
+  {
+    img: `${base}/assets/new/Lemon_seed_powder.png`, // ✅ FIXED
+    title: "Lemon Seed Powder",
+    description: [
+      "A natural source of lemon seed powder",
+      "✔ Natural exfoliant",
+      "✔ Removes dead skin",
+      "✔ Chemical scrub safe alternative",
+    ],
+    rating: 4.5,
+  },
 
     {
       img: `${base}/assets/new/Black_lemon_powder.png`,
