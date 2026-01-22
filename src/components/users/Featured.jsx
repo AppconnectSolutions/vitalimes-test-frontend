@@ -7,45 +7,42 @@ export default function Featured() {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
 
-  const API_URL = import.meta.env.VITE_API_URL || "https://api.appconnect.cloud";
+  const API_URL =
+    import.meta.env.VITE_API_URL || "https://api.appconnect.cloud";
 
-  // ✅ MinIO Public URL + Bucket
   const MINIO_PUBLIC_URL =
     import.meta.env.VITE_MINIO_PUBLIC_URL || "https://minio.appconnect.cloud";
   const MINIO_BUCKET =
     import.meta.env.VITE_MINIO_BUCKET || "vitalimes-images";
 
-  // ✅ Convert DB filename/key/url -> correct public MinIO URL
+  // ✅ SAFE image URL normalizer (NO localhost leakage)
   const toImageUrl = (filename) => {
     if (!filename) return "";
 
     let key = String(filename).trim();
 
-    // If DB stored full URL already, return as-is
-    if (key.startsWith("http://") || key.startsWith("https://")) {
-      return key;
-    }
+    // 🔥 Strip protocol + domain (localhost / old backend URLs)
+    key = key.replace(/^https?:\/\/[^/]+\/+/i, "");
 
     // Remove leading slashes
     key = key.replace(/^\/+/, "");
 
-    // If DB stored "bucket/uploads/xxx", strip "bucket/"
+    // Remove bucket prefix if present
     if (key.startsWith(`${MINIO_BUCKET}/`)) {
       key = key.slice(MINIO_BUCKET.length + 1);
     }
 
-    // If key doesn't start with "uploads/", add it (your main case)
+    // Ensure uploads/ exists
     if (!key.startsWith("uploads/")) {
       key = `uploads/${key}`;
     }
 
-    // Encode safely
+    // Encode path safely
     key = key.split("/").map(encodeURIComponent).join("/");
 
     return `${MINIO_PUBLIC_URL}/${MINIO_BUCKET}/${key}`;
   };
 
-  // Load featured products
   useEffect(() => {
     const loadProducts = async () => {
       try {
@@ -82,7 +79,6 @@ export default function Featured() {
           overflow: hidden;
           position: relative;
           border-bottom: 1px solid #ddd;
-          background: #fff;
         }
 
         .product-img-container img {
@@ -90,15 +86,13 @@ export default function Featured() {
           height: 100%;
           object-fit: cover;
           position: absolute;
-          top: 0;
-          left: 0;
+          inset: 0;
           opacity: 0;
-          transition: opacity 0.4s ease-in-out;
+          transition: opacity 0.4s ease;
         }
 
-        /* ✅ Always show main image */
         .product-img-container img.main-img {
-          opacity: 1 !important;
+          opacity: 1;
           z-index: 1;
         }
 
@@ -114,7 +108,7 @@ export default function Featured() {
 
         .add-btn {
           background: #5b7f2b;
-          color: white;
+          color: #fff;
           border-radius: 6px;
           padding: 8px 16px;
           border: none;
@@ -127,10 +121,7 @@ export default function Featured() {
       `}</style>
 
       <Container className="my-5">
-        <h2
-          className="fw-bold text-center mb-4"
-          style={{ color: "#1f3b2f", fontSize: "32px" }}
-        >
+        <h2 className="fw-bold text-center mb-4" style={{ color: "#1f3b2f" }}>
           Featured Products
         </h2>
 
@@ -141,9 +132,6 @@ export default function Featured() {
             const img1 = toImageUrl(product.image1);
             const img2 = toImageUrl(product.image2 || product.image1);
             const img3 = toImageUrl(product.image3 || product.image1);
-
-            // ✅ Debug in console
-            console.log("Featured image URL:", img1);
 
             return (
               <Col
@@ -180,17 +168,7 @@ export default function Featured() {
                   </div>
 
                   <div className="p-3">
-                    <h6 className="fw-bold" style={{ minHeight: "40px" }}>
-                      {product.title}
-                      {product.units && (
-                        <span
-                          className="text-muted"
-                          style={{ fontSize: "14px", marginLeft: "10px" }}
-                        >
-                          – Pack of ({product.units})
-                        </span>
-                      )}
-                    </h6>
+                    <h6 className="fw-bold">{product.title}</h6>
 
                     {firstVariant && (
                       <div>
@@ -198,17 +176,15 @@ export default function Featured() {
                           ₹{firstVariant.price}
                         </span>
                         <span className="fw-bold">
-                          From ₹{firstVariant.sale_price || firstVariant.price}
+                          From ₹
+                          {firstVariant.sale_price || firstVariant.price}
                         </span>
                       </div>
                     )}
 
-                    <div className="mt-2 d-flex align-items-center">
-                      <span style={{ color: "#ffcc00" }}>★★★★☆</span>
-                      <span className="ms-2">4.4</span>
-                    </div>
-
-                    <button className="add-btn w-100 mt-3">ADD TO CART</button>
+                    <button className="add-btn w-100 mt-3">
+                      ADD TO CART
+                    </button>
                   </div>
                 </div>
               </Col>
