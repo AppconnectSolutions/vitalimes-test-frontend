@@ -13,31 +13,48 @@ export default function ProductCard({ product }) {
 
   // ---------------------- MinIO Config ----------------------
   const MINIO_PUBLIC_URL =
-    import.meta.env.VITE_MINIO_PUBLIC_URL || "http://minio.appconnect.cloud";
+    import.meta.env.VITE_MINIO_PUBLIC_URL || "https://minio.appconnect.cloud";
   const MINIO_BUCKET = import.meta.env.VITE_MINIO_BUCKET || "vitalimes-images";
 
-  // ---------------------- Helper: Convert DB filename -> MinIO URL ----------------------
-  const toImageUrl = (filename) => {
-    if (!filename) return "";
-    let key = String(filename).trim();
+  // ---------------------- Helper: Convert DB value -> MinIO URL ----------------------
+  const toImageUrl = (val) => {
+    if (!val) return "";
+    let key = String(val).trim();
 
+    // If DB stored full URL already
     if (key.startsWith("http://") || key.startsWith("https://")) {
-      const parts = key.split("/");
-      key = parts[parts.length - 1];
+      // If it already points to your minio bucket, keep it as is
+      // else it is external url, also keep it
+      return key;
     }
 
-    key = key.replace(/^uploads\//, "");
+    // Remove leading slashes
+    key = key.replace(/^\/+/, "");
+
+    // If DB stored "bucket/...." remove bucket prefix
+    if (key.startsWith(`${MINIO_BUCKET}/`)) {
+      key = key.slice(MINIO_BUCKET.length + 1);
+    }
+
+    // If it doesn't start with uploads/, add uploads/ (your project uses uploads folder)
+    if (!key.startsWith("uploads/")) {
+      key = `uploads/${key}`;
+    }
+
+    // Encode
     key = key.split("/").map(encodeURIComponent).join("/");
 
-    return `${MINIO_PUBLIC_URL}/${MINIO_BUCKET}/uploads/${key}`;
+    return `${MINIO_PUBLIC_URL}/${MINIO_BUCKET}/${key}`;
   };
 
   // ---------------------- IMAGE HANDLING ----------------------
-  const imageFront = toImageUrl(product.image_url) || "/assets/images/placeholder.png";
+  const imageFront =
+    toImageUrl(product.image_url) || "/assets/images/placeholder.png";
   const imageMiddle = toImageUrl(product.image_url2 || product.image_url) || imageFront;
   const imageBack = toImageUrl(product.image_url3 || product.image_url) || imageFront;
 
-  const images = [imageFront, imageMiddle, imageBack];
+  const images = [imageFront, imageMiddle, imageBack].filter(Boolean);
+
   const [hoverImageIndex, setHoverImageIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
 
@@ -53,7 +70,7 @@ export default function ProductCard({ product }) {
     return () => clearInterval(interval);
   }, [isHovered, images.length]);
 
-  const currentImage = images[hoverImageIndex];
+  const currentImage = images[hoverImageIndex] || "/assets/images/placeholder.png";
 
   // ---------------------- PRICE LOGIC ----------------------
   const price = Number(product.price);
@@ -67,12 +84,19 @@ export default function ProductCard({ product }) {
       ? Number(product.offer_price)
       : null;
 
-  if ((offerPercent === null || isNaN(offerPercent)) && salePrice !== null && salePrice < price) {
+  if (
+    (offerPercent === null || isNaN(offerPercent)) &&
+    salePrice !== null &&
+    !isNaN(price) &&
+    price > 0 &&
+    salePrice < price
+  ) {
     offerPercent = Math.round(((price - salePrice) / price) * 100);
   }
 
   const hasDiscount =
     salePrice !== null && !isNaN(salePrice) && salePrice > 0 && salePrice < price;
+
   const rating = product.rating || 5;
 
   // ---------------------- REDIRECT ----------------------
@@ -127,7 +151,6 @@ export default function ProductCard({ product }) {
             key={idx}
             src={img}
             alt={product.name || product.title}
-            className={idx === hoverImageIndex ? "main-img" : `hover-${idx}`}
             style={{
               width: "100%",
               height: "100%",
@@ -138,18 +161,25 @@ export default function ProductCard({ product }) {
               opacity: idx === hoverImageIndex ? 1 : 0,
               transition: "opacity 0.4s ease-in-out",
             }}
+            onError={(e) => {
+              e.currentTarget.src = "/assets/images/placeholder.png";
+            }}
           />
         ))}
       </div>
 
       {/* PRODUCT INFO */}
       <Card.Body>
-        <Card.Title className="fw-semibold">{product.name || product.title}</Card.Title>
+        <Card.Title className="fw-semibold">
+          {product.name || product.title}
+        </Card.Title>
 
         <div className="mb-2">
           {hasDiscount ? (
             <>
-              <span className="fw-bold text-success fs-4 me-2">₹{salePrice.toFixed(2)}</span>
+              <span className="fw-bold text-success fs-4 me-2">
+                ₹{salePrice.toFixed(2)}
+              </span>
               <span className="text-muted text-decoration-line-through fs-6 me-2">
                 ₹{price.toFixed(2)}
               </span>
