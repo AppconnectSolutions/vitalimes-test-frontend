@@ -9,39 +9,47 @@ export default function Featured() {
 
   const API_URL = import.meta.env.VITE_API_URL || "https://api.appconnect.cloud";
 
-  // MinIO public bucket config
+  // ✅ MinIO Public URL + Bucket
   const MINIO_PUBLIC_URL =
     import.meta.env.VITE_MINIO_PUBLIC_URL || "https://minio.appconnect.cloud";
   const MINIO_BUCKET =
     import.meta.env.VITE_MINIO_BUCKET || "vitalimes-images";
 
-  // Convert DB filename -> full MinIO URL
+  // ✅ Convert DB filename/key/url -> correct public MinIO URL
   const toImageUrl = (filename) => {
     if (!filename) return "";
 
     let key = String(filename).trim();
 
-    // If DB stored full URL, extract filename
+    // If DB stored full URL already, return as-is
     if (key.startsWith("http://") || key.startsWith("https://")) {
-      key = key.split("/").pop();
+      return key;
     }
 
-    // Remove uploads/ if exists
-    key = key.replace(/^uploads\//, "");
+    // Remove leading slashes
+    key = key.replace(/^\/+/, "");
 
-    // Encode special characters
+    // If DB stored "bucket/uploads/xxx", strip "bucket/"
+    if (key.startsWith(`${MINIO_BUCKET}/`)) {
+      key = key.slice(MINIO_BUCKET.length + 1);
+    }
+
+    // If key doesn't start with "uploads/", add it (your main case)
+    if (!key.startsWith("uploads/")) {
+      key = `uploads/${key}`;
+    }
+
+    // Encode safely
     key = key.split("/").map(encodeURIComponent).join("/");
 
-    return `${MINIO_PUBLIC_URL}/${MINIO_BUCKET}/uploads/${key}`;
+    return `${MINIO_PUBLIC_URL}/${MINIO_BUCKET}/${key}`;
   };
 
   // Load featured products
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const res = await axios.get(
-          `${API_URL}/api/products?status=Active`
-        );
+        const res = await axios.get(`${API_URL}/api/products?status=Active`);
         setProducts(res.data.products?.slice(0, 4) || []);
       } catch (error) {
         console.error("Failed to load featured products:", error);
@@ -52,7 +60,6 @@ export default function Featured() {
 
   return (
     <>
-      {/* ✅ FIXED CSS */}
       <style>{`
         .product-card {
           width: 100%;
@@ -75,6 +82,7 @@ export default function Featured() {
           overflow: hidden;
           position: relative;
           border-bottom: 1px solid #ddd;
+          background: #fff;
         }
 
         .product-img-container img {
@@ -88,7 +96,7 @@ export default function Featured() {
           transition: opacity 0.4s ease-in-out;
         }
 
-        /* ✅ FORCE MAIN IMAGE VISIBILITY */
+        /* ✅ Always show main image */
         .product-img-container img.main-img {
           opacity: 1 !important;
           z-index: 1;
@@ -134,6 +142,9 @@ export default function Featured() {
             const img2 = toImageUrl(product.image2 || product.image1);
             const img3 = toImageUrl(product.image3 || product.image1);
 
+            // ✅ Debug in console
+            console.log("Featured image URL:", img1);
+
             return (
               <Col
                 key={product.id}
@@ -152,19 +163,19 @@ export default function Featured() {
                       src={img1}
                       className="main-img"
                       alt={product.title}
-                      onError={(e) => (e.target.src = "/no-image.png")}
+                      onError={(e) => (e.currentTarget.src = "/no-image.png")}
                     />
                     <img
                       src={img2}
                       className="hover-1"
                       alt={product.title}
-                      onError={(e) => (e.target.src = "/no-image.png")}
+                      onError={(e) => (e.currentTarget.src = "/no-image.png")}
                     />
                     <img
                       src={img3}
                       className="hover-2"
                       alt={product.title}
-                      onError={(e) => (e.target.src = "/no-image.png")}
+                      onError={(e) => (e.currentTarget.src = "/no-image.png")}
                     />
                   </div>
 
@@ -187,9 +198,7 @@ export default function Featured() {
                           ₹{firstVariant.price}
                         </span>
                         <span className="fw-bold">
-                          From ₹
-                          {firstVariant.sale_price ||
-                            firstVariant.price}
+                          From ₹{firstVariant.sale_price || firstVariant.price}
                         </span>
                       </div>
                     )}
@@ -199,9 +208,7 @@ export default function Featured() {
                       <span className="ms-2">4.4</span>
                     </div>
 
-                    <button className="add-btn w-100 mt-3">
-                      ADD TO CART
-                    </button>
+                    <button className="add-btn w-100 mt-3">ADD TO CART</button>
                   </div>
                 </div>
               </Col>
