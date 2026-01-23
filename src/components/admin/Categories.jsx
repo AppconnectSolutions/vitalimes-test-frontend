@@ -15,36 +15,40 @@ export default function Categories() {
 
   const entriesPerPage = 8;
 
-  // ✅ IMPORTANT: MinIO public base (same domain you tested with curl -I)
-  // If you ever change bucket/public domain, update here.
+  // ✅ MinIO public base URL (bucket path)
   const MINIO_PUBLIC_BASE = useMemo(() => {
-    // keep it simple + reliable
     return "https://minio.appconnect.cloud/vitalimes-images";
   }, []);
 
-  // ✅ Helper: convert stored DB value -> usable image URL
+  // ✅ Local fallback image (NO external DNS dependency)
+  const FALLBACK_IMG = "/no-img.png";
+
+  // ✅ Convert stored DB value -> usable image URL
   // Supports:
   // 1) full URL already (https://...)
-  // 2) stored key like: uploads/Black_lemon_dry.png
-  // 3) stored file only like: Black_lemon_dry.png
+  // 2) stored key with folders (uploads/x.png, categories/x.png, icons/x.png)
+  // 3) stored bucket prefix (vitalimes-images/uploads/x.png)
+  // 4) stored file only (x.png) -> assumes uploads/x.png
   const toImageUrl = (val) => {
     if (!val) return "";
     const s = String(val).trim();
-    if (!s) return "";
+
+    if (!s || s === "null" || s === "undefined") return "";
 
     // already full URL
     if (/^https?:\/\//i.test(s)) return s;
 
-    // if they stored "vitalimes-images/uploads/..." or "/vitalimes-images/uploads/..."
-    // take only from "uploads/..."
-    const idx = s.indexOf("uploads/");
-    const key = idx >= 0 ? s.slice(idx) : s.startsWith("uploads/") ? s : `uploads/${s}`;
+    // remove leading slashes
+    let key = s.replace(/^\/+/, "");
 
-    // ✅ safest encoding for paths + spaces
-    const encoded = key
-      .split("/")
-      .map((p) => encodeURIComponent(p))
-      .join("/");
+    // strip bucket prefix if saved in DB
+    key = key.replace(/^vitalimes-images\//, "");
+
+    // if only filename, assume uploads/
+    if (!key.includes("/")) key = `uploads/${key}`;
+
+    // encode safely
+    const encoded = key.split("/").map(encodeURIComponent).join("/");
 
     return `${MINIO_PUBLIC_BASE}/${encoded}`;
   };
@@ -194,8 +198,7 @@ export default function Categories() {
               <tbody>
                 {categories.length > 0 ? (
                   categories.map((cat) => {
-                    // ✅ SUPER IMPORTANT:
-                    // include ALL common possible field names to avoid mismatch
+                    // ✅ collect possible image fields from API
                     const raw =
                       cat.image_url ||
                       cat.icon ||
@@ -208,6 +211,10 @@ export default function Categories() {
                       "";
 
                     const imgUrl = toImageUrl(raw);
+
+                    // ✅ debug: you can see in console what value is coming and what URL is built
+                    // remove later if you want
+                    console.log("CATEGORY IMG RAW:", raw, "=> URL:", imgUrl);
 
                     return (
                       <tr key={cat.id}>
@@ -222,13 +229,20 @@ export default function Categories() {
                               alt={cat.category_name || cat.name || "Category"}
                               loading="lazy"
                               onError={(e) => {
-                                // fallback if missing / permission / wrong key
-                                e.currentTarget.src =
-                                  "https://via.placeholder.com/45?text=No+Img";
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = FALLBACK_IMG;
                               }}
                             />
                           ) : (
-                            "-"
+                            <img
+                              src={FALLBACK_IMG}
+                              width="45"
+                              height="45"
+                              className="rounded"
+                              style={{ objectFit: "cover" }}
+                              alt="No Image"
+                              loading="lazy"
+                            />
                           )}
                         </td>
 
