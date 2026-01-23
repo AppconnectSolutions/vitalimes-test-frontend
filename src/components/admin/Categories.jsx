@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Edit2, Trash2 } from "react-feather";
 
@@ -15,23 +15,38 @@ export default function Categories() {
 
   const entriesPerPage = 8;
 
-  // ✅ Helper: convert image value to usable URL
-  // - If backend returns full URL => use it
-  // - If backend returns only "uploads/..." or "file.jpg" => build MinIO public url
+  // ✅ IMPORTANT: MinIO public base (same domain you tested with curl -I)
+  // If you ever change bucket/public domain, update here.
+  const MINIO_PUBLIC_BASE = useMemo(() => {
+    // keep it simple + reliable
+    return "https://minio.appconnect.cloud/vitalimes-images";
+  }, []);
+
+  // ✅ Helper: convert stored DB value -> usable image URL
+  // Supports:
+  // 1) full URL already (https://...)
+  // 2) stored key like: uploads/Black_lemon_dry.png
+  // 3) stored file only like: Black_lemon_dry.png
   const toImageUrl = (val) => {
     if (!val) return "";
     const s = String(val).trim();
     if (!s) return "";
 
-    // already a full URL
+    // already full URL
     if (/^https?:\/\//i.test(s)) return s;
 
-    // otherwise treat as object key/path
-    const key = s.startsWith("uploads/") ? s : `uploads/${s}`;
+    // if they stored "vitalimes-images/uploads/..." or "/vitalimes-images/uploads/..."
+    // take only from "uploads/..."
+    const idx = s.indexOf("uploads/");
+    const key = idx >= 0 ? s.slice(idx) : s.startsWith("uploads/") ? s : `uploads/${s}`;
 
-    // build from public minio url (same as products)
-    // NOTE: this is the public domain, not API_URL
-    return `https://minio.appconnect.cloud/vitalimes-images/${encodeURI(key)}`;
+    // ✅ safest encoding for paths + spaces
+    const encoded = key
+      .split("/")
+      .map((p) => encodeURIComponent(p))
+      .join("/");
+
+    return `${MINIO_PUBLIC_BASE}/${encoded}`;
   };
 
   // ---------------- API LOAD ----------------
@@ -59,7 +74,7 @@ export default function Categories() {
     if (search.trim() !== "") {
       const term = search.toLowerCase();
       filtered = filtered.filter((c) =>
-        (c.category_name || "").toLowerCase().includes(term)
+        (c.category_name || c.name || "").toLowerCase().includes(term)
       );
     }
 
@@ -77,9 +92,10 @@ export default function Categories() {
     let ok = true;
 
     if (search.trim() !== "") {
-      ok = (c.category_name || "")
-        .toLowerCase()
-        .includes(search.toLowerCase());
+      ok =
+        (c.category_name || c.name || "")
+          .toLowerCase()
+          .includes(search.toLowerCase());
     }
 
     if (statusFilter) ok = ok && c.status === statusFilter;
@@ -102,6 +118,8 @@ export default function Categories() {
       if (data.success) {
         alert("Category Deleted");
         loadCategories();
+      } else {
+        alert(data.error || "Delete failed");
       }
     } catch (err) {
       alert("Delete failed");
@@ -176,10 +194,17 @@ export default function Categories() {
               <tbody>
                 {categories.length > 0 ? (
                   categories.map((cat) => {
+                    // ✅ SUPER IMPORTANT:
+                    // include ALL common possible field names to avoid mismatch
                     const raw =
                       cat.image_url ||
                       cat.icon ||
                       cat.category_icon ||
+                      cat.image ||
+                      cat.image1 ||
+                      cat.category_image ||
+                      cat.categoryImage ||
+                      cat.category_icon_url ||
                       "";
 
                     const imgUrl = toImageUrl(raw);
@@ -189,7 +214,7 @@ export default function Categories() {
                         <td>
                           {imgUrl ? (
                             <img
-                              src={imgUrl} // ✅ FIXED
+                              src={imgUrl}
                               width="45"
                               height="45"
                               className="rounded"
@@ -197,6 +222,7 @@ export default function Categories() {
                               alt={cat.category_name || cat.name || "Category"}
                               loading="lazy"
                               onError={(e) => {
+                                // fallback if missing / permission / wrong key
                                 e.currentTarget.src =
                                   "https://via.placeholder.com/45?text=No+Img";
                               }}
