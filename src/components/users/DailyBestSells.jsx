@@ -59,16 +59,16 @@ export default function DailyBestSells() {
       rating: 4.5,
     },
 
-   {
-    img: `${base}/assets/new/Black_lemon_dry.png`, // ✅ FIXED
-    title: "Black Lemon",
-    description: [
-      "Dried black lemons for recipes",
-      "✔ High antioxidant",
-      "✔ Natural smoky sourness",
-    ],
-    rating: 4.5,
-  },
+  {
+  img: "https://minio.appconnect.cloud/vitalimes-images/uploads/Black_lemon_dry.png",
+  title: "Black Lemon",
+  description: [
+    "Dried black lemons for recipes",
+    "✔ High antioxidant",
+    "✔ Natural smoky sourness",
+  ],
+  rating: 4.5,
+},
 
   {
     img: `${base}/assets/new/Lemon_seed_powder.png`, // ✅ FIXED
