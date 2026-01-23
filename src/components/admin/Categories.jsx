@@ -20,20 +20,71 @@ export default function Categories() {
     return "https://minio.appconnect.cloud/vitalimes-images";
   }, []);
 
-  // ✅ Local fallback image (NO external DNS dependency)
-  const FALLBACK_IMG = "/no-img.png";
+  // ✅ ZERO-network fallback image (always works)
+  const FALLBACK_IMG = useMemo(() => {
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="45" height="45">
+        <rect width="100%" height="100%" fill="#e9ecef"/>
+        <text x="50%" y="52%" text-anchor="middle" dominant-baseline="middle"
+              font-size="10" fill="#6c757d" font-family="Arial">
+          No Img
+        </text>
+      </svg>
+    `;
+    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+  }, []);
+
+  // ✅ pick image field even if DB column name is different
+  const pickImageValue = (cat) => {
+    if (!cat || typeof cat !== "object") return "";
+
+    // preferred keys first
+    const preferred = [
+      "image_url",
+      "icon",
+      "category_icon",
+      "image",
+      "image1",
+      "category_image",
+      "categoryImage",
+      "category_icon_url",
+      "categoryicon",
+      "cat_icon",
+      "cat_image",
+    ];
+
+    for (const k of preferred) {
+      if (cat[k]) return cat[k];
+    }
+
+    // fallback: find any string that looks like an image filename/path
+    for (const v of Object.values(cat)) {
+      if (typeof v === "string" && /\.(png|jpg|jpeg|webp|svg|gif)$/i.test(v.trim())) {
+        return v;
+      }
+    }
+
+    return "";
+  };
+
+  // ✅ safe encode without double-encoding
+  const safeEncodeSegment = (seg) => {
+    try {
+      const decoded = decodeURIComponent(seg);
+      return encodeURIComponent(decoded);
+    } catch {
+      return encodeURIComponent(seg);
+    }
+  };
 
   // ✅ Convert stored DB value -> usable image URL
-  // Supports:
-  // 1) full URL already (https://...)
-  // 2) stored key with folders (uploads/x.png, categories/x.png, icons/x.png)
-  // 3) stored bucket prefix (vitalimes-images/uploads/x.png)
-  // 4) stored file only (x.png) -> assumes uploads/x.png
   const toImageUrl = (val) => {
     if (!val) return "";
     const s = String(val).trim();
 
-    if (!s || s === "null" || s === "undefined") return "";
+    if (!s || s === "-" || /^no\s*image$/i.test(s) || s === "null" || s === "undefined") {
+      return "";
+    }
 
     // already full URL
     if (/^https?:\/\//i.test(s)) return s;
@@ -48,7 +99,10 @@ export default function Categories() {
     if (!key.includes("/")) key = `uploads/${key}`;
 
     // encode safely
-    const encoded = key.split("/").map(encodeURIComponent).join("/");
+    const encoded = key
+      .split("/")
+      .map(safeEncodeSegment)
+      .join("/");
 
     return `${MINIO_PUBLIC_BASE}/${encoded}`;
   };
@@ -198,52 +252,28 @@ export default function Categories() {
               <tbody>
                 {categories.length > 0 ? (
                   categories.map((cat) => {
-                    // ✅ collect possible image fields from API
-                    const raw =
-                      cat.image_url ||
-                      cat.icon ||
-                      cat.category_icon ||
-                      cat.image ||
-                      cat.image1 ||
-                      cat.category_image ||
-                      cat.categoryImage ||
-                      cat.category_icon_url ||
-                      "";
-
+                    const raw = pickImageValue(cat);
                     const imgUrl = toImageUrl(raw);
 
-                    // ✅ debug: you can see in console what value is coming and what URL is built
-                    // remove later if you want
-                    console.log("CATEGORY IMG RAW:", raw, "=> URL:", imgUrl);
+                    // optional debug (keep for now)
+                    // console.log("RAW:", raw, "URL:", imgUrl, "CAT:", cat);
 
                     return (
                       <tr key={cat.id}>
                         <td>
-                          {imgUrl ? (
-                            <img
-                              src={imgUrl}
-                              width="45"
-                              height="45"
-                              className="rounded"
-                              style={{ objectFit: "cover" }}
-                              alt={cat.category_name || cat.name || "Category"}
-                              loading="lazy"
-                              onError={(e) => {
-                                e.currentTarget.onerror = null;
-                                e.currentTarget.src = FALLBACK_IMG;
-                              }}
-                            />
-                          ) : (
-                            <img
-                              src={FALLBACK_IMG}
-                              width="45"
-                              height="45"
-                              className="rounded"
-                              style={{ objectFit: "cover" }}
-                              alt="No Image"
-                              loading="lazy"
-                            />
-                          )}
+                          <img
+                            src={imgUrl || FALLBACK_IMG}
+                            width="45"
+                            height="45"
+                            className="rounded"
+                            style={{ objectFit: "cover" }}
+                            alt={cat.category_name || cat.name || "Category"}
+                            loading="lazy"
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = FALLBACK_IMG;
+                            }}
+                          />
                         </td>
 
                         <td className="fw-semibold">
