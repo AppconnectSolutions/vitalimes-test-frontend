@@ -33,6 +33,7 @@ export default function Products() {
 
   useEffect(() => {
     fetchProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, status]);
 
   const handleDelete = async (id) => {
@@ -102,7 +103,10 @@ export default function Products() {
 
           <button
             className="btn btn-dark rounded-pill px-4 fw-semibold"
-            onClick={fetchProducts}
+            onClick={() => {
+              setPage(1);
+              fetchProducts();
+            }}
           >
             Apply
           </button>
@@ -142,105 +146,119 @@ export default function Products() {
               </thead>
 
               <tbody>
-  {products.length > 0 ? (
-    products.map((p) => {
-      const firstImage =
-        p.image1 ||
-        p.image2 ||
-        p.image3 ||
-        p.image4 ||
-        p.image5 ||
-        p.image6;
+                {products.length > 0 ? (
+                  products.map((p) => {
+                    // ✅ Backend already returns FULL URL for images
+                    const firstImage =
+                      p.image1 ||
+                      p.image2 ||
+                      p.image3 ||
+                      p.image4 ||
+                      p.image5 ||
+                      p.image6 ||
+                      null;
 
-      // Read first variant (or empty if none)
-      const v = p.variants?.[0] || {};
+                    const v = p.variants?.[0] || {};
 
-      return (
-        <tr key={p.id}>
-          
-          {/* IMAGE */}
-          <td>
-            {firstImage ? (
-              <img
-                src={`${API_URL}/uploads/${firstImage}`}
-                width="45"
-                height="45"
-                className="rounded"
-                style={{ objectFit: "cover" }}
-              />
-            ) : (
-              "-"
-            )}
-          </td>
+                    return (
+                      <tr key={p.id}>
+                        {/* IMAGE */}
+                        <td>
+                          {firstImage ? (
+                            <img
+                              src={firstImage} // ✅ FIX
+                              width="45"
+                              height="45"
+                              className="rounded"
+                              style={{ objectFit: "cover" }}
+                              alt={p.title || "Product"}
+                              loading="lazy"
+                              onError={(e) => {
+                                // Optional fallback (avoid broken icon)
+                                e.currentTarget.src =
+                                  "https://via.placeholder.com/45?text=No+Img";
+                              }}
+                            />
+                          ) : (
+                            "-"
+                          )}
+                        </td>
 
-          {/* NAME */}
-          <td className="fw-semibold">{p.title}</td>
+                        {/* NAME */}
+                        <td className="fw-semibold">{p.title}</td>
 
-          {/* CATEGORY */}
-          <td>{p.category}</td>
+                        {/* CATEGORY */}
+                        <td>{p.category}</td>
 
-          {/* HSN */}
-          <td>{p.hsn || "-"}</td>
+                        {/* HSN */}
+                        <td>{p.hsn || "-"}</td>
 
-          {/* PRICE */}
-          <td>₹{v.price ?? 0}</td>
+                        {/* PRICE */}
+                        <td>₹{v.price ?? 0}</td>
 
-          {/* SALE PRICE */}
-          <td className="text-success fw-semibold">
-            ₹{v.sale_price ?? 0}
-          </td>
+                        {/* SALE PRICE */}
+                        <td className="text-success fw-semibold">
+                          ₹{v.sale_price ?? 0}
+                        </td>
 
-          {/* OFFER PERCENT */}
-          <td>{v.offer_percent ?? 0}%</td>
+                        {/* OFFER PERCENT */}
+                        <td>{v.offer_percent ?? 0}%</td>
 
-          {/* TAX (from tax_amount) */}
-          <td className="text-danger">₹{v.tax_amount ?? 0}</td>
+                        {/* TAX */}
+                        <td className="text-danger">₹{v.tax_amount ?? 0}</td>
 
-          {/* STOCK */}
-          <td>{v.stock ?? 0}</td>
+                        {/* STOCK */}
+                        <td>{v.stock ?? 0}</td>
 
-          {/* STATUS */}
-          <td>
-            <span
-              className={`badge rounded-pill ${
-                p.status === "Active" ? "bg-success" : "bg-secondary"
-              }`}
-            >
-              {p.status}
-            </span>
-          </td>
+                        {/* STATUS */}
+                        <td>
+                          <span
+                            className={`badge rounded-pill ${
+                              p.status === "Active"
+                                ? "bg-success"
+                                : "bg-secondary"
+                            }`}
+                          >
+                            {p.status}
+                          </span>
+                        </td>
 
-          {/* DATE */}
-          <td>{new Date(p.created_at).toLocaleDateString()}</td>
+                        {/* DATE */}
+                        <td>
+                          {p.created_at
+                            ? new Date(p.created_at).toLocaleDateString()
+                            : "-"}
+                        </td>
 
-          {/* ACTIONS */}
-          <td className="text-end">
-            <button
-              className="btn btn-outline-dark btn-sm rounded-circle me-2"
-              onClick={() => navigate(`/admin/edit-product/${p.id}`)}
-            >
-              <Edit2 size={16} />
-            </button>
+                        {/* ACTIONS */}
+                        <td className="text-end">
+                          <button
+                            className="btn btn-outline-dark btn-sm rounded-circle me-2"
+                            onClick={() =>
+                              navigate(`/admin/edit-product/${p.id}`)
+                            }
+                          >
+                            <Edit2 size={16} />
+                          </button>
 
-            <button
-              className="btn btn-outline-danger btn-sm rounded-circle"
-              onClick={() => handleDelete(p.id)}
-            >
-              <Trash2 size={16} />
-            </button>
-          </td>
-        </tr>
-      );
-    })
-  ) : (
-    <tr>
-      <td colSpan="12" className="text-center py-4">
-        No products found.
-      </td>
-    </tr>
-  )}
-</tbody>
-
+                          <button
+                            className="btn btn-outline-danger btn-sm rounded-circle"
+                            onClick={() => handleDelete(p.id)}
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="12" className="text-center py-4">
+                      No products found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
             </table>
           </div>
 
