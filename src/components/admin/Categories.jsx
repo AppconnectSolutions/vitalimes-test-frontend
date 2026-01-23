@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";      // <-- FIXED
+import { Link, useNavigate } from "react-router-dom";
 import { Edit2, Trash2 } from "react-feather";
 
 export default function Categories() {
   const API_URL = import.meta.env.VITE_API_URL || "https://api.appconnect.cloud";
-  const navigate = useNavigate();   // <-- WORKS NOW
+  const navigate = useNavigate();
 
   const [allCategories, setAllCategories] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -14,6 +14,25 @@ export default function Categories() {
   const [page, setPage] = useState(1);
 
   const entriesPerPage = 8;
+
+  // ✅ Helper: convert image value to usable URL
+  // - If backend returns full URL => use it
+  // - If backend returns only "uploads/..." or "file.jpg" => build MinIO public url
+  const toImageUrl = (val) => {
+    if (!val) return "";
+    const s = String(val).trim();
+    if (!s) return "";
+
+    // already a full URL
+    if (/^https?:\/\//i.test(s)) return s;
+
+    // otherwise treat as object key/path
+    const key = s.startsWith("uploads/") ? s : `uploads/${s}`;
+
+    // build from public minio url (same as products)
+    // NOTE: this is the public domain, not API_URL
+    return `https://minio.appconnect.cloud/vitalimes-images/${encodeURI(key)}`;
+  };
 
   // ---------------- API LOAD ----------------
   const loadCategories = async () => {
@@ -89,14 +108,8 @@ export default function Categories() {
     }
   };
 
-  // ---------------- Edit ----------------
-  const handleEdit = (id) => {
-    window.location.href = `/edit-category/${id}`;
-  };
-
   return (
     <main className="main-content-wrapper p-4">
-
       {/* PAGE HEADER */}
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="fw-bold">Categories</h2>
@@ -149,10 +162,8 @@ export default function Categories() {
       {/* TABLE CARD */}
       <div className="card shadow-sm">
         <div className="card-body p-0">
-
           <div className="table-responsive">
             <table className="table table-hover align-middle mb-0">
-
               <thead className="table-light">
                 <tr>
                   <th>Icon</th>
@@ -165,22 +176,30 @@ export default function Categories() {
               <tbody>
                 {categories.length > 0 ? (
                   categories.map((cat) => {
-                    const img =
+                    const raw =
                       cat.image_url ||
                       cat.icon ||
                       cat.category_icon ||
                       "";
 
+                    const imgUrl = toImageUrl(raw);
+
                     return (
                       <tr key={cat.id}>
                         <td>
-                          {img ? (
+                          {imgUrl ? (
                             <img
-                              src={`${API_URL}/uploads/${img}`}
+                              src={imgUrl} // ✅ FIXED
                               width="45"
                               height="45"
                               className="rounded"
                               style={{ objectFit: "cover" }}
+                              alt={cat.category_name || cat.name || "Category"}
+                              loading="lazy"
+                              onError={(e) => {
+                                e.currentTarget.src =
+                                  "https://via.placeholder.com/45?text=No+Img";
+                              }}
                             />
                           ) : (
                             "-"
@@ -203,25 +222,23 @@ export default function Categories() {
                           </span>
                         </td>
 
-                        {/* RIGHT ALIGNED ACTIONS */}
                         <td className="text-end">
+                          <button
+                            className="btn btn-light border me-2 rounded-circle p-2"
+                            onClick={() =>
+                              navigate(`/admin/edit-category/${cat.id}`)
+                            }
+                          >
+                            <Edit2 size={16} color="green" />
+                          </button>
 
-  <button
-    className="btn btn-light border me-2 rounded-circle p-2"
-    onClick={() => navigate(`/admin/edit-category/${cat.id}`)}
-  >
-    <Edit2 size={16} color="green" />
-  </button>
-
-  <button
-    className="btn btn-light border rounded-circle p-2"
-    onClick={() => handleDelete(cat.id)}
-  >
-    <Trash2 size={16} color="red" />
-  </button>
-
-</td>
-
+                          <button
+                            className="btn btn-light border rounded-circle p-2"
+                            onClick={() => handleDelete(cat.id)}
+                          >
+                            <Trash2 size={16} color="red" />
+                          </button>
+                        </td>
                       </tr>
                     );
                   })
@@ -236,7 +253,7 @@ export default function Categories() {
             </table>
           </div>
 
-          {/* PAGINATION (same as product page) */}
+          {/* PAGINATION */}
           <div className="d-flex justify-content-between align-items-center p-3 border-top">
             <span>
               Showing {categories.length} of {totalEntries} entries
@@ -262,7 +279,6 @@ export default function Categories() {
               </button>
             </div>
           </div>
-
         </div>
       </div>
     </main>
