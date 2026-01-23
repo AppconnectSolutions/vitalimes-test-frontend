@@ -8,12 +8,12 @@ export default function ShopByCategory() {
       : "";
 
   const categories = [
-  { title: "Lemon Powder", img: "https://appconnect.cloud/uploads/lemon_powder.png", link: "/products" },
-  { title: "Black Lemon", img: "https://appconnect.cloud/uploads/Black_lemon_dry.png", link: "/products" },
-  { title: "Lemon Seed Powder", img: "https://appconnect.cloud/uploads/Lemon_seed_powder.png", link: "/products" },
-  { title: "Lemon Seed Oil", img: "https://appconnect.cloud/uploads/seed_oil.png", link: "/products" },
-  { title: "Lemon Essential Oil", img: "https://appconnect.cloud/uploads/essential_oil.png", link: "/products" },
-  { title: "Black Lemon Powder", img: "https://appconnect.cloud/uploads/Black_lemon_powder.png", link: "/products" }
+  { title: "Lemon Powder", img: "https://minio.appconnect.cloud/vitalimes-images/uploads/lemon_powder.png", link: "/products" },
+  { title: "Black Lemon", img: "https://minio.appconnect.cloud/vitalimes-images/uploads/Black_lemon_dry.png", link: "/products" },
+  { title: "Lemon Seed Powder", img: "https://minio.appconnect.cloud/vitalimes-images/uploads/Lemon_seed_powder.png", link: "/products" },
+  { title: "Lemon Seed Oil", img: "https://minio.appconnect.cloud/vitalimes-images/uploads/seed_oil.png", link: "/products" },
+  { title: "Lemon Essential Oil", img: "https://minio.appconnect.cloud/vitalimes-images/uploads/essential_oil.png", link: "/products" },
+  { title: "Black Lemon Powder", img: "https://minio.appconnect.cloud/vitalimes-images/uploads/Black_lemon_powder.png", link: "/products" }
 ];
 
   return (
