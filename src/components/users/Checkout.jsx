@@ -134,6 +134,7 @@ export default function Checkout() {
         name: "Vitalimes",
         description: "Order Payment",
         order_id: order.id,
+        image: "https://vitalimes.com/logo.png",
 
         // ⭐ 3️⃣ After payment success → update DB
         handler: async function (response) {
