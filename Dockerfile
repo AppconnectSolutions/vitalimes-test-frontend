@@ -1,35 +1,19 @@
-# ---------- Stage 1: Build ----------
-FROM node:18-alpine AS build
+FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install
 
-# Copy source code
 COPY . .
 
-# Build the Vite app
 RUN npm run build
 
+RUN npm install -g serve
 
-# ---------- Stage 2: Serve ----------
-FROM nginx:alpine
+# IMPORTANT: use platform port
+ENV PORT=8080
 
-# Remove default nginx config
-RUN rm /etc/nginx/conf.d/default.conf
+EXPOSE 8080
 
-# Copy custom nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Copy build output to nginx html directory
-COPY --from=build /app/dist /usr/share/nginx/html
-
-# Expose port 80
-EXPOSE 80
-
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["sh", "-c", "serve -s dist -l $PORT"]
