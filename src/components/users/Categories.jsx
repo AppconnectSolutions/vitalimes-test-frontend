@@ -11,8 +11,8 @@ export default function ShopByCategory() {
   { title: "Lemon Powder", img: "https://minio.vitalimes.com/vitalimes-images/uploads/lemon_powder.png", link: "/products" },
   { title: "Black Lemon", img: "https://minio.vitalimes.com/vitalimes-images/uploads/Black_lemon_dry.png", link: "/products" },
   { title: "Lemon Seed Powder", img: "https://minio.vitalimes.com/vitalimes-images/uploads/Lemon_seed_powder.png", link: "/products" },
-  { title: "Lemon Seed Oil", img: "https://minio.vitalimes.com/vitalimes-images/uploads/seed_oil.png", link: "/products" },
-  { title: "Lemon Essential Oil", img: "https://minio.vitalimes.com/vitalimes-images/uploads/essential_oil.png", link: "/products" },
+  { title: "Lemon Seed Oil", img: "/assets/images/category_lemon_seed_oil.png", link: "/products" },
+  { title: "Lemon Essential Oil", img: "/assets/images/category_essential_oil.png", link: "/products" },
   { title: "Black Lemon Powder", img: "https://minio.vitalimes.com/vitalimes-images/uploads/Black_lemon_powder.png", link: "/products" }
 ];
 
