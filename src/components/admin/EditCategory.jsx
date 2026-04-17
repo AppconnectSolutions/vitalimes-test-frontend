@@ -107,8 +107,11 @@ export default function EditCategory() {
     formData.append("status", status);
 
     // ✅ IMPORTANT: file field name should be image (or icon if backend supports)
-    if (image) formData.append("image", image);
-
+    if (image) {
+  formData.append("image", image);   // new upload
+} else {
+  formData.append("existingImage", existingImage);  // keep old image
+}
     try {
       setSaving(true);
 

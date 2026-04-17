@@ -18,7 +18,7 @@ export default function Categories() {
   // ✅ MinIO public base URL (bucket path)
   // ✅ MinIO public base URL (bucket path)
 const MINIO_PUBLIC_BASE = useMemo(() => {
-  return "https://minio.vitalimes.com/vitalimes-images";
+  return "https://minio.appconnect.cloud/vitalimes-images";
 }, []);
 
 
@@ -80,34 +80,33 @@ const MINIO_PUBLIC_BASE = useMemo(() => {
   };
 
   // ✅ Convert stored DB value -> usable image URL
-  const toImageUrl = (val) => {
-    if (!val) return "";
-    const s = String(val).trim();
+const toImageUrl = (val) => {
+  if (!val) return "";
 
-    if (!s || s === "-" || /^no\s*image$/i.test(s) || s === "null" || s === "undefined") {
-      return "";
-    }
+  const s = String(val).trim();
+  if (!s) return "";
 
-    // already full URL
-    if (/^https?:\/\//i.test(s)) return s;
+  // if full URL → replace old domain
+  if (/^https?:\/\//i.test(s)) {
+    return s.replace(
+      "https://minio.vitalimes.com",
+      "https://minio.appconnect.cloud"
+    );
+  }
 
-    // remove leading slashes
-    let key = s.replace(/^\/+/, "");
+  let key = s.replace(/^\/+/, "");
 
-    // strip bucket prefix if saved in DB
-    key = key.replace(/^vitalimes-images\//, "");
+  // remove bucket prefix if exists
+  key = key.replace(/^vitalimes-images\//, "");
 
-    // if only filename, assume uploads/
-    if (!key.includes("/")) key = `uploads/${key}`;
+  // encode safely
+  const encoded = key
+    .split("/")
+    .map((seg) => encodeURIComponent(decodeURIComponent(seg)))
+    .join("/");
 
-    // encode safely
-    const encoded = key
-      .split("/")
-      .map(safeEncodeSegment)
-      .join("/");
-
-    return `${MINIO_PUBLIC_BASE}/${encoded}`;
-  };
+  return `https://minio.appconnect.cloud/vitalimes-images/${encoded}`;
+};
 
   // ---------------- API LOAD ----------------
   const loadCategories = async () => {
