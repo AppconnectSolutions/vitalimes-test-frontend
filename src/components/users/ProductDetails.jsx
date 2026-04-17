@@ -16,19 +16,29 @@ export default function ProductDetails() {
 
   // Convert DB filename -> full MinIO URL
   const toImageUrl = (filename) => {
-    if (!filename) return "";
-    let key = String(filename).trim();
+  if (!filename) return "";
 
-    if (key.startsWith("http://") || key.startsWith("https://")) {
-      const parts = key.split("/");
-      key = parts[parts.length - 1];
-    }
+  let key = String(filename).trim();
 
-    key = key.replace(/^uploads\//, "");
-    key = key.split("/").map(encodeURIComponent).join("/");
+  // If already full URL → fix old domain
+  if (key.startsWith("http")) {
+    return key.replace(
+      "https://minio.vitalimes.com",
+      "https://minio.appconnect.cloud"
+    );
+  }
 
-    return `${MINIO_PUBLIC_URL}/${MINIO_BUCKET}/uploads/${key}`;
-  };
+  // remove leading slash
+  key = key.replace(/^\/+/, "");
+
+  // remove bucket prefix if exists
+  key = key.replace(/^vitalimes-images\//, "");
+
+  // encode safely
+  key = key.split("/").map(encodeURIComponent).join("/");
+
+  return `https://minio.appconnect.cloud/vitalimes-images/${key}`;
+};
 
   const [product, setProduct] = useState(null);
   const [selectedVariant, setSelectedVariant] = useState(null);

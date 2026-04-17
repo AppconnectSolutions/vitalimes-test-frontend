@@ -13,39 +13,34 @@ export default function ProductCard({ product }) {
 
   // ---------------------- MinIO Config ----------------------
   const MINIO_PUBLIC_URL =
-    import.meta.env.VITE_MINIO_PUBLIC_URL || "https://minio.vitalimes.com";
+    import.meta.env.VITE_MINIO_PUBLIC_URL || "https://minio.appconnect.cloud";
   const MINIO_BUCKET = import.meta.env.VITE_MINIO_BUCKET || "vitalimes-images";
 
   // ---------------------- Helper: Convert DB value -> MinIO URL ----------------------
   const toImageUrl = (val) => {
-    if (!val) return "";
-    let key = String(val).trim();
+  if (!val) return "";
 
-    // If DB stored full URL already
-    if (key.startsWith("http://") || key.startsWith("https://")) {
-      // If it already points to your minio bucket, keep it as is
-      // else it is external url, also keep it
-      return key;
-    }
+  let key = String(val).trim();
 
-    // Remove leading slashes
-    key = key.replace(/^\/+/, "");
+  // If full URL → fix old domain
+  if (key.startsWith("http")) {
+    return key.replace(
+      "https://minio.vitalimes.com",
+      "https://minio.appconnect.cloud"
+    );
+  }
 
-    // If DB stored "bucket/...." remove bucket prefix
-    if (key.startsWith(`${MINIO_BUCKET}/`)) {
-      key = key.slice(MINIO_BUCKET.length + 1);
-    }
+  // remove leading slash
+  key = key.replace(/^\/+/, "");
 
-    // If it doesn't start with uploads/, add uploads/ (your project uses uploads folder)
-    if (!key.startsWith("uploads/")) {
-      key = `uploads/${key}`;
-    }
+  // remove bucket prefix if exists
+  key = key.replace(/^vitalimes-images\//, "");
 
-    // Encode
-    key = key.split("/").map(encodeURIComponent).join("/");
+  // encode safely
+  key = key.split("/").map(encodeURIComponent).join("/");
 
-    return `${MINIO_PUBLIC_URL}/${MINIO_BUCKET}/${key}`;
-  };
+  return `https://minio.appconnect.cloud/vitalimes-images/${key}`;
+};
 
   // ---------------------- IMAGE HANDLING ----------------------
   const imageFront =

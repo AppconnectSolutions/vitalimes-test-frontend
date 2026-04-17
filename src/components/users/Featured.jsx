@@ -16,33 +16,30 @@ export default function Featured() {
     import.meta.env.VITE_MINIO_BUCKET || "vitalimes-images";
 
   // ✅ SAFE image URL normalizer (NO localhost leakage)
-  const toImageUrl = (filename) => {
-    if (!filename) return "";
+const toImageUrl = (filename) => {
+  if (!filename) return "";
 
-    let key = String(filename).trim();
+  let key = String(filename).trim();
 
-    // 🔥 Strip protocol + domain (localhost / old backend URLs)
-    key = key.replace(/^https?:\/\/[^/]+\/+/i, "");
+  // If full URL → fix old domain
+  if (key.startsWith("http")) {
+    return key.replace(
+      "https://minio.vitalimes.com",
+      "https://minio.appconnect.cloud"
+    );
+  }
 
-    // Remove leading slashes
-    key = key.replace(/^\/+/, "");
+  // remove leading slashes
+  key = key.replace(/^\/+/, "");
 
-    // Remove bucket prefix if present
-    if (key.startsWith(`${MINIO_BUCKET}/`)) {
-      key = key.slice(MINIO_BUCKET.length + 1);
-    }
+  // remove bucket prefix if present
+  key = key.replace(/^vitalimes-images\//, "");
 
-    // Ensure uploads/ exists
-    if (!key.startsWith("uploads/")) {
-      key = `uploads/${key}`;
-    }
+  // encode safely
+  key = key.split("/").map(encodeURIComponent).join("/");
 
-    // Encode path safely
-    key = key.split("/").map(encodeURIComponent).join("/");
-
-    return `${MINIO_PUBLIC_URL}/${MINIO_BUCKET}/${key}`;
-  };
-
+  return `https://minio.appconnect.cloud/vitalimes-images/${key}`;
+};
   useEffect(() => {
     const loadProducts = async () => {
       try {
