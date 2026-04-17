@@ -106,7 +106,7 @@ const MINIO_PUBLIC_BASE = useMemo(() => {
       .map(safeEncodeSegment)
       .join("/");
 
-    return `${API_URL}/images/${encoded}`;
+    return `${MINIO_PUBLIC_BASE}/${encoded}`;
   };
 
   // ---------------- API LOAD ----------------
