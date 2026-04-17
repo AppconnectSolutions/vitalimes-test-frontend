@@ -11,7 +11,7 @@ export default function Featured() {
     import.meta.env.VITE_API_URL || "https://api.appconnect.cloud";
 
   const MINIO_PUBLIC_URL =
-    import.meta.env.VITE_MINIO_PUBLIC_URL || "https://minio.vitalimes.com";
+    import.meta.env.VITE_MINIO_PUBLIC_URL || "https://minio.appconnect.cloud";
   const MINIO_BUCKET =
     import.meta.env.VITE_MINIO_BUCKET || "vitalimes-images";
 
