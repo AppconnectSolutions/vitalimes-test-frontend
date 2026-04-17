@@ -13,30 +13,47 @@ export default function FeedbackCarousel() {
   // ✅ MinIO config
   const MINIO_PUBLIC_URL =
     import.meta.env.VITE_MINIO_PUBLIC_URL ||
-    "https://minio.vitalimes.com";
+    "https://minio.appconnect.cloud";
   const MINIO_BUCKET =
     import.meta.env.VITE_MINIO_BUCKET || "vitalimes-images";
 
   // ✅ Convert DB filename → MinIO URL
   const toImageUrl = (filename) => {
-    if (!filename) return "";
+  if (!filename) return "";
 
-    let key = String(filename).trim();
+  let key = String(filename).trim();
 
-    // If already full URL, extract filename
-    if (key.startsWith("http://") || key.startsWith("https://")) {
-      const parts = key.split("/");
-      key = parts[parts.length - 1];
-    }
+  // If full URL → fix old domain
+  if (key.startsWith("http")) {
+    return key.replace(
+      "https://minio.vitalimes.com",
+      "https://minio.appconnect.cloud"
+    );
+  }
 
-    // Remove uploads/ if present
-    key = key.replace(/^uploads\//, "");
+  // remove protocol/domain if stored
+  key = key.replace(/^https?:\/\/[^/]+\/+/i, "");
 
-    // Encode special characters
-    key = key.split("/").map(encodeURIComponent).join("/");
+  // remove leading slash
+  key = key.replace(/^\/+/, "");
 
-    return `${MINIO_PUBLIC_URL}/${MINIO_BUCKET}/uploads/${key}`;
-  };
+  // remove bucket prefix
+  key = key.replace(/^vitalimes-images\//, "");
+
+  // 🔥 FIX DOUBLE ENCODING
+  key = key
+    .split("/")
+    .map((part) => {
+      try {
+        return encodeURIComponent(decodeURIComponent(part));
+      } catch {
+        return encodeURIComponent(part);
+      }
+    })
+    .join("/");
+
+  return `https://minio.appconnect.cloud/vitalimes-images/${key}`;
+};
 
   // ✅ Fetch feedbacks
   useEffect(() => {

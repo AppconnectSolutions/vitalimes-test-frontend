@@ -11,32 +11,47 @@ export default function ProductGrid() {
     import.meta.env.VITE_API_URL || "http://localhost:5000";
 
   const MINIO_PUBLIC_URL =
-    import.meta.env.VITE_MINIO_PUBLIC_URL || "https://minio.vitalimes.com";
+    import.meta.env.VITE_MINIO_PUBLIC_URL || "https://minio.appconnect.cloud";
   const MINIO_BUCKET =
     import.meta.env.VITE_MINIO_BUCKET || "vitalimes-images";
 
   // ✅ SAME safe normalizer
   const toImageUrl = (filename) => {
-    if (!filename) return "";
+  if (!filename) return "";
 
-    let key = String(filename).trim();
+  let key = String(filename).trim();
 
-    key = key.replace(/^https?:\/\/[^/]+\/+/i, "");
-    key = key.replace(/^\/+/, "");
+  // Fix old domain if full URL
+  if (key.startsWith("http")) {
+    return key.replace(
+      "https://minio.vitalimes.com",
+      "https://minio.appconnect.cloud"
+    );
+  }
 
-    if (key.startsWith(`${MINIO_BUCKET}/`)) {
-      key = key.slice(MINIO_BUCKET.length + 1);
-    }
+  // remove protocol/domain if accidentally stored
+  key = key.replace(/^https?:\/\/[^/]+\/+/i, "");
 
-    if (!key.startsWith("uploads/")) {
-      key = `uploads/${key}`;
-    }
+  // remove leading slash
+  key = key.replace(/^\/+/, "");
 
-    key = key.split("/").map(encodeURIComponent).join("/");
+  // remove bucket if present
+  key = key.replace(/^vitalimes-images\//, "");
 
-    return `${MINIO_PUBLIC_URL}/${MINIO_BUCKET}/${key}`;
-  };
+  // 🔥 FIX DOUBLE ENCODING
+  key = key
+    .split("/")
+    .map((part) => {
+      try {
+        return encodeURIComponent(decodeURIComponent(part));
+      } catch {
+        return encodeURIComponent(part);
+      }
+    })
+    .join("/");
 
+  return `https://minio.appconnect.cloud/vitalimes-images/${key}`;
+};
   useEffect(() => {
     const fetchProducts = async () => {
       try {
