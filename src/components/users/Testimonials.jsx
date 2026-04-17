@@ -23,12 +23,15 @@ export default function FeedbackCarousel() {
 
   let key = String(filename).trim();
 
-  // If full URL → fix old domain
+  // handle full URL
   if (key.startsWith("http")) {
-    return key.replace(
+    key = key.replace(
       "https://minio.vitalimes.com",
       "https://minio.appconnect.cloud"
     );
+
+    const parts = key.split("vitalimes-images/");
+    key = parts[1] || "";
   }
 
   // remove protocol/domain if stored
@@ -40,7 +43,7 @@ export default function FeedbackCarousel() {
   // remove bucket prefix
   key = key.replace(/^vitalimes-images\//, "");
 
-  // 🔥 FIX DOUBLE ENCODING
+  // fix encoding
   key = key
     .split("/")
     .map((part) => {
