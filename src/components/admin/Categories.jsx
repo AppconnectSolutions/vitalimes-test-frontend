@@ -18,7 +18,7 @@ export default function Categories() {
   // ✅ MinIO public base URL (bucket path)
   // ✅ MinIO public base URL (bucket path)
 const MINIO_PUBLIC_BASE = useMemo(() => {
-  return "https://appconnect.cloud/vitalimes-images";
+  return "https://minio.appconnect.cloud/vitalimes-images";
 }, []);
 
 
