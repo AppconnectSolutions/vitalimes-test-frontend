@@ -120,17 +120,20 @@ const toImageUrl = (filename) => {
                 <div className="col-12 col-md-6">
                   <div className="bg-white rounded-4 shadow-sm h-100 d-flex align-items-center justify-content-center p-4">
                     <img
-                      src={
-                        toImageUrl(item.product_image) ||
-                        "/placeholder.png"
-                      }
-                      alt={item.product_name}
-                      className="img-fluid"
-                      style={{
-                        maxHeight: 260,
-                        objectFit: "contain",
-                      }}
-                    />
+  src={toImageUrl(item.product_image) || "/placeholder.png"}
+  onError={(e) => {
+    e.target.onerror = null;
+
+    // fallback to local server
+    e.target.src = `${API_URL}/${item.product_image}`;
+  }}
+  alt={item.product_name || item.productName}
+  className="img-fluid"
+  style={{
+    maxHeight: 260,
+    objectFit: "contain",
+  }}
+/>
                   </div>
                 </div>
 
