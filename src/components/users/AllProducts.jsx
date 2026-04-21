@@ -59,7 +59,37 @@ export default function AllProducts() {
   return (
     <>
       <style>{`
-        .product-card { width: 100%; max-width: 340px; border-radius: 16px; overflow: hidden; border: 1px solid #e0e0e0; transition: 0.3s ease; cursor: pointer; background: #fff; }
+        .product-card {
+  width: 100%;
+  max-width: 340px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+  transition: 0.3s ease;
+  cursor: pointer;
+  background: #fff;
+
+  display: flex;              /* ✅ ADD */
+  flex-direction: column;     /* ✅ ADD */
+  height: 100%;               /* ✅ ADD */
+}
+
+.product-card .p-3 {
+  display: flex;              /* ✅ ADD */
+  flex-direction: column;     /* ✅ ADD */
+  flex-grow: 1;               /* ✅ ADD */
+}
+
+/* ✅ NEW CLASS */
+.product-title {
+  min-height: 48px;
+  max-height: 48px;
+  overflow: hidden;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;      /* only 2 lines */
+  -webkit-box-orient: vertical;
+}
         .product-card:hover { box-shadow: 0 8px 22px rgba(0,0,0,0.15); }
         .product-img-container { width: 100%; height: 330px; overflow: hidden; position: relative; border-bottom: 1px solid #ddd; }
         .product-img-container img { width: 100%; height: 100%; object-fit: cover; position: absolute; opacity: 0; transition: opacity 0.4s ease-in-out; }
@@ -67,7 +97,16 @@ export default function AllProducts() {
         .product-card:hover .hover-1 { opacity: 1; }
         .product-card:hover .hover-2 { animation: fadeSlide 1.4s forwards 0.4s; }
         @keyframes fadeSlide { from { opacity: 0; } to { opacity: 1; } }
-        .add-btn { background: #5b7f2b; color: white; border-radius: 6px; padding: 8px 16px; border: none; font-weight: 600; }
+       .add-btn {
+  background: #5b7f2b;
+  color: white;
+  border-radius: 6px;
+  padding: 8px 16px;
+  border: none;
+  font-weight: 600;
+
+  margin-top: auto;           /* ✅ ADD */
+} 
         .add-btn:hover { background: #4a6a22; }
       `}</style>
 
@@ -96,7 +135,7 @@ export default function AllProducts() {
                   </div>
 
                   <div className="p-3">
-                    <h6 className="fw-bold" style={{ minHeight: "40px" }}>
+                    <h6 className="fw-bold product-title">
                       {product.title}
                       {product.units && (
                         <span className="text-muted" style={{ fontSize: "14px", marginLeft: "10px" }}>

@@ -1,20 +1,65 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { Container } from "react-bootstrap";
 
 export default function ShopByCategory() {
+  const [categories, setCategories] = useState([]);
+
   const base =
     typeof process !== "undefined" && process.env && process.env.PUBLIC_URL
       ? process.env.PUBLIC_URL
       : "";
 
-  const categories = [
-  { title: "Lemon Powder", img: "https://minio.vitalimes.com/vitalimes-images/uploads/lemon_powder.png", link: "/products" },
-  { title: "Black Lemon", img: "https://minio.vitalimes.com/vitalimes-images/uploads/Black_lemon_dry.png", link: "/products" },
-  { title: "Lemon Seed Powder", img: "https://minio.vitalimes.com/vitalimes-images/uploads/Lemon_seed_powder.png", link: "/products" },
-  { title: "Lemon Seed Oil", img: "/assets/images/category_lemon_seed_oil.png", link: "/products" },
-  { title: "Lemon Essential Oil", img: "/assets/images/category_essential_oil.png", link: "/products" },
-  { title: "Black Lemon Powder", img: "https://minio.vitalimes.com/vitalimes-images/uploads/Black_lemon_powder.png", link: "/products" }
-];
+  // ✅ API config (same as products)
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+  const MINIO_PUBLIC_URL =
+    import.meta.env.VITE_MINIO_PUBLIC_URL || "https://minio.appconnect.cloud";
+
+  const MINIO_BUCKET =
+    import.meta.env.VITE_MINIO_BUCKET || "vitalimes-images";
+
+  // ✅ Convert DB image -> full MinIO URL (same as products)
+  const toImageUrl = (filename) => {
+    if (!filename) return "";
+
+    let key = String(filename).trim();
+
+    if (key.startsWith("http")) {
+      return key.replace(
+        "https://minio.vitalimes.com",
+        "https://minio.appconnect.cloud"
+      );
+    }
+
+    key = key.replace(/^\/+/, "");
+    key = key.replace(/^vitalimes-images\//, "");
+
+    key = key.split("/").map(encodeURIComponent).join("/");
+
+    return `${MINIO_PUBLIC_URL}/${MINIO_BUCKET}/${key}`;
+  };
+
+  // ✅ Fetch categories from backend
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/categories`);
+
+        const formatted = res.data.map((item) => ({
+          title: item.category_name,
+          img: toImageUrl(item.image_url),
+          link: "/products",
+        }));
+
+        setCategories(formatted);
+      } catch (error) {
+        console.error("Failed to load categories:", error);
+      }
+    };
+
+    loadCategories();
+  }, [API_URL]);
 
   return (
     <section style={{ padding: "2rem 0", background: "#fdfdfd" }}>
@@ -36,7 +81,6 @@ export default function ShopByCategory() {
             .category-grid { grid-template-columns: 1fr; }
           }
 
-          /* Card */
           .category-card {
             width: 100%;
             height: 360px;
@@ -49,7 +93,6 @@ export default function ShopByCategory() {
             transition: 0.3s ease;
           }
 
-          /* FULL IMAGE COVER (NO WHITE SPACE) */
           .category-bg {
             position: absolute;
             top: 0;
@@ -66,7 +109,6 @@ export default function ShopByCategory() {
             transform: scale(1.08);
           }
 
-          /* TITLE — MAXIMUM VISIBILITY */
           .category-title {
             position: absolute;
             bottom: 0;
@@ -76,7 +118,6 @@ export default function ShopByCategory() {
             font-size: 1.45rem;
             font-weight: 900;
             letter-spacing: 0.6px;
-
             color: #ffffff !important;
             background: linear-gradient(
               to top,
@@ -84,7 +125,6 @@ export default function ShopByCategory() {
               rgba(0,0,0,0.4),
               transparent
             );
-
             text-shadow: 0px 0px 6px rgba(0,0,0,0.9);
           }
         `}</style>
