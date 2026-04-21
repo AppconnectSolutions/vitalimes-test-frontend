@@ -18,41 +18,33 @@ export default function FeedbackCarousel() {
     import.meta.env.VITE_MINIO_BUCKET || "vitalimes-images";
 
   // ✅ Convert DB filename → MinIO URL
-  const toImageUrl = (filename) => {
+const toImageUrl = (filename) => {
   if (!filename) return "";
 
   let key = String(filename).trim();
 
-  // handle full URL
+  // If full URL → just fix domain and return
   if (key.startsWith("http")) {
-    key = key.replace(
+    return key.replace(
       "https://minio.vitalimes.com",
       "https://minio.appconnect.cloud"
     );
-
-    const parts = key.split("vitalimes-images/");
-    key = parts[1] || "";
   }
-
-  // remove protocol/domain if stored
-  key = key.replace(/^https?:\/\/[^/]+\/+/i, "");
 
   // remove leading slash
   key = key.replace(/^\/+/, "");
 
-  // remove bucket prefix
+  // remove bucket if already present
   key = key.replace(/^vitalimes-images\//, "");
 
-  // fix encoding
+  // ✅ IMPORTANT: decode first, then encode once
+  try {
+    key = decodeURIComponent(key);
+  } catch {}
+
   key = key
     .split("/")
-    .map((part) => {
-      try {
-        return encodeURIComponent(decodeURIComponent(part));
-      } catch {
-        return encodeURIComponent(part);
-      }
-    })
+    .map((part) => encodeURIComponent(part))
     .join("/");
 
   return `https://minio.appconnect.cloud/vitalimes-images/${key}`;
