@@ -23,22 +23,21 @@ const toImageUrl = (filename) => {
 
   let key = String(filename).trim();
 
-  // 🔥 If full URL → clean it (DON'T return directly)
+  // ✅ If already MinIO URL → return as is
+  if (key.includes("minio.appconnect.cloud")) {
+    return key;
+  }
+
+  // ✅ If full URL (localhost etc) → return as is
   if (key.startsWith("http")) {
-    try {
-      const url = new URL(key);
-      key = url.pathname; // get only /uploads/...
-    } catch {
-      // fallback
-      key = key.replace(/^https?:\/\/[^/]+/, "");
-    }
+    return key;
   }
 
   // clean path
   key = key.replace(/^\/+/, "");
   key = key.replace(/(uploads\/)+/g, "uploads/");
 
-  // return MinIO path
+  // build MinIO URL
   return `https://minio.appconnect.cloud/vitalimes-images/${key}`;
 };
 
