@@ -105,25 +105,26 @@ export default function Navbar({ openCart }) {
               <ul className="navbar-nav mx-auto align-items-lg-center gap-lg-4 mt-3 mt-lg-0">
                 {navItems.map((item) => (
                   <li className="nav-item mx-1" key={item.to}>
-                    <NavLink
-                      to={item.to}
-                      end={item.to === "/"}
-                      className={({ isActive }) =>
-                        "nav-link px-0 fw-semibold " +
-                        (isActive ? "text-success" : "text-dark") +
-                        (item.label === "Shopnow" ? " shopnow-highlight" : "")
-                      }
-                      style={({ isActive }) => ({
-                        fontSize: "0.95rem",
-                        paddingBottom: "4px",
-                        borderBottom: isActive
-                          ? "2px solid #16a34a"
-                          : "2px solid transparent",
-                        transition: "0.2s",
-                      })}
-                    >
-                      {item.label}
-                    </NavLink>
+                  <NavLink
+  to={item.to}
+  end={item.to === "/"}
+  onClick={closeNavbar}   // ✅ ADD THIS LINE
+  className={({ isActive }) =>
+    "nav-link px-0 fw-semibold " +
+    (isActive ? "text-success" : "text-dark") +
+    (item.label === "Shopnow" ? " shopnow-highlight" : "")
+  }
+  style={({ isActive }) => ({
+    fontSize: "0.95rem",
+    paddingBottom: "4px",
+    borderBottom: isActive
+      ? "2px solid #16a34a"
+      : "2px solid transparent",
+    transition: "0.2s",
+  })}
+>
+  {item.label}
+</NavLink>
                   </li>
                 ))}
               </ul>
