@@ -44,13 +44,13 @@ export default function DailyBestSells() {
 
   const products = [
     {
-      img: `${base}/assets/new/essential_oil.png`,
+      img: `${base}/assets/images/category_essential_oil.png`,
       title: "Lemon Essential Oil",
       description: ["Natural astringent", "Anti-bacterial", "Anti dandruff"],
       rating: 4.5,
     },
     {
-      img: `${base}/assets/new/lemon_powder.png`,
+      img: `${base}/assets/images/category_lemon_powder.png`,
       title: "Lemon Powder Drink",
       description: ["Long shelf life", "Natural flavour", "Easy storage"],
       rating: 4.5,
