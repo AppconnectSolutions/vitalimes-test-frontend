@@ -23,30 +23,22 @@ const toImageUrl = (filename) => {
 
   let key = String(filename).trim();
 
-  // If full URL → just fix domain and return
+  // 🔥 If full URL → clean it (DON'T return directly)
   if (key.startsWith("http")) {
-    return key.replace(
-      "https://minio.vitalimes.com",
-      "https://minio.appconnect.cloud"
-    );
+    try {
+      const url = new URL(key);
+      key = url.pathname; // get only /uploads/...
+    } catch {
+      // fallback
+      key = key.replace(/^https?:\/\/[^/]+/, "");
+    }
   }
 
-  // remove leading slash
+  // clean path
   key = key.replace(/^\/+/, "");
+  key = key.replace(/(uploads\/)+/g, "uploads/");
 
-  // remove bucket if already present
-  key = key.replace(/^vitalimes-images\//, "");
-
-  // ✅ IMPORTANT: decode first, then encode once
-  try {
-    key = decodeURIComponent(key);
-  } catch {}
-
-  key = key
-    .split("/")
-    .map((part) => encodeURIComponent(part))
-    .join("/");
-
+  // return MinIO path
   return `https://minio.appconnect.cloud/vitalimes-images/${key}`;
 };
 
@@ -119,13 +111,26 @@ const toImageUrl = (filename) => {
                 {/* Product Image */}
                 <div className="col-12 col-md-6">
                   <div className="bg-white rounded-4 shadow-sm h-100 d-flex align-items-center justify-content-center p-4">
-                    <img
-  src={toImageUrl(item.product_image) || "/placeholder.png"}
+                 <img
+  src={toImageUrl(item.product_image)}
   onError={(e) => {
-    e.target.onerror = null;
+    if (!e.target.dataset.fallback) {
+      e.target.dataset.fallback = "true";
 
-    // fallback to local server
-    e.target.src = `${API_URL}/${item.product_image}`;
+      let img = item.product_image;
+
+      if (!img) return;
+
+      // If already full URL → use directly
+      if (img.startsWith("http")) {
+        e.target.src = img;
+      } else {
+        // clean duplicate uploads
+        img = img.replace(/(uploads\/)+/g, "uploads/");
+
+        e.target.src = `${API_URL}/${img}`;
+      }
+    }
   }}
   alt={item.product_name || item.productName}
   className="img-fluid"
