@@ -103,31 +103,7 @@ export default function About() {
    {/* ---------------------------------------------------------------- */}
 {/* STATS SECTION */}
 {/* ---------------------------------------------------------------- */}
-<section className="stats-fullwidth-section">
-  <div className="stats-grid">
 
-    <div className="stat-box">
-      <h2>60M+</h2>
-      <p>Happy Customers</p>
-    </div>
-
-    <div className="stat-box">
-      <h2>105M+</h2>
-      <p>Grocery Products</p>
-    </div>
-
-    <div className="stat-box">
-      <h2>80K+</h2>
-      <p>Active Salesman</p>
-    </div>
-
-    <div className="stat-box">
-      <h2>60K+</h2>
-      <p>Store Worldwide</p>
-    </div>
-
-  </div>
-</section>
 
 
 
