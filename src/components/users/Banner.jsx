@@ -7,13 +7,13 @@ export default function Banner() {
 
   const slides = [
     {
-      img: "/assets/images/update_bg_1.png",
+      img: "/assets/images/update_bg_1.jpeg",
       title: "Healthy Living Starts",
       sub: "Nature’s Freshness Delivered to Your Home",
       pos: { top: "20%", left: "7%", textAlign: "left", width: "45%" }
     },
     {
-      img: "/assets/images/update_bg_2.png",
+      img: "/assets/images/update_bg_2.jpeg",
       title: "Instant Lemon Refreshment",
       sub: "Beat the Heat with Vitalimes Lemon Powder",
       pos: { top: "22%", right: "7%", textAlign: "right", width: "40%" }
@@ -25,7 +25,7 @@ export default function Banner() {
       pos: { top: "15%", right: "6%", textAlign: "right", width: "40%" }
     },
     {
-      img: "/assets/images/update_bg_4.png",
+      img: "/assets/images/update_bg_4.jpeg",
       title: "Sip the Sun. Taste the Zest.",
       sub: "Cool Down with Pure Lemon Bliss",
       pos: { top: "28%", right: "6%", textAlign: "right", width: "40%" }

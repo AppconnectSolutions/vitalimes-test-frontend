@@ -20,7 +20,7 @@ export default function Recipes() {
       path: "/recipes/lemon-rice",
     },
     {
-      img: `/assets/images/recepies/lemon_tea.png`,
+      img: `/assets/images/recepies/lemon_tea.jpeg`,
       title: "Lemon Juice",
       description: "A refreshing green juice with lemon",
       path: "/recipes/green-juice", 
