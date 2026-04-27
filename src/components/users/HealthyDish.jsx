@@ -1,175 +1,232 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { FaLeaf } from "react-icons/fa";
 
 export default function LemonSeedOilUses() {
-const navigate = useNavigate();
+
+  const navigate = useNavigate();
+
+  const [text, setText] = useState("");
+  const fullText = "Glow naturally with the power of lemon 🍋";
+
   useEffect(() => {
     window.scrollTo(0, 0);
+
+    let i = 0;
+    const interval = setInterval(() => {
+      setText(fullText.substring(0, i));
+      i++;
+      if (i > fullText.length) clearInterval(interval);
+    }, 35);
+
+    return () => clearInterval(interval);
   }, []);
 
   return (
-    <div style={{ background: "#f6f8f3" }}>
+    <div className="page">
 
-      {/* 🔥 HERO SECTION */}
-      <div className="hero">
-        <img
-          src="/assets/images/category_essential_oil.png"
-          alt="Lemon Seed Oil"
-          className="hero-img"
-        />
+      {/* 🔥 TITLE */}
+      <div className="title-section">
+        <motion.h1
+          initial={{ opacity: 0, y: -40 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          🍋 Lemon Essential Oil
+        </motion.h1>
 
-        <h1>Lemon Essential Oil</h1>
-        <p>
-          Natural, versatile oil for food, skincare, haircare, and wellness.
-        </p>
+        <p className="typing">{text}</p>
       </div>
 
-      {/* 🔥 ALL USES */}
+      {/* 🔥 PRODUCT IMAGE + BUTTON */}
+      <motion.div
+        className="product-section"
+        initial={{ scale: 0.8 }}
+        animate={{ scale: 1 }}
+      >
+        <div className="product-wrapper">
+          <img
+            src="/assets/images/category_essential_oil.png"
+            alt="Lemon Oil"
+            className="product-img"
+          />
+
+          <button
+            className="shop-btn"
+            onClick={() => navigate("/product/64")}
+          >
+            Shop Now
+          </button>
+        </div>
+      </motion.div>
+
+      {/* 🔥 USES */}
       <div className="uses-container">
         {uses.map((item, i) => (
           <motion.div
             key={i}
             className="use-card"
-            initial={{ opacity: 0, y: 60 }}
+            initial={{ opacity: 0, y: 80 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ delay: i * 0.15 }}
           >
             <img src={item.img} alt={item.title} />
-            <h3>{item.title}</h3>
-            <p>{item.desc}</p>
+
+            <div className="overlay">
+              <FaLeaf />
+              <h3>{item.title}</h3>
+              <p>{item.desc}</p>
+            </div>
           </motion.div>
         ))}
       </div>
 
-      {/* 🔥 BUY BUTTON */}
-    <div className="buy-section">
-  <button
-    className="buy-btn"
-    onClick={() => navigate("/product/64")}
-  >
-    Buy Now
-  </button>
-</div>
-
       {/* 🔥 CSS */}
       <style>{`
 
-.hero {
-  position: relative;
-  width: 100%;
-  height: 60vh; /* 🔥 banner height */
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap');
+
+.page {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #f6f8f3, #eef5e9);
+  min-height: 100vh;
+}
+
+/* TITLE */
+.title-section {
+  text-align: center;
+  padding: 60px 20px 20px;
+}
+
+.title-section h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  background: linear-gradient(45deg, #2e7d32, #81c784);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.typing {
+  font-size: 1.2rem;
+  color: #444;
+  margin-top: 10px;
+  min-height: 25px;
+}
+
+/* PRODUCT */
+.product-section {
   text-align: center;
 }
 
-.hero-img {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* 🔥 fills full screen */
-  top: 0;
-  left: 0;
-  z-index: 1;
-}
-
-/* overlay for text visibility */
-.hero::after {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.4);
-  top: 0;
-  left: 0;
-  z-index: 2;
-}
-
-.hero h1,
-.hero p {
+.product-wrapper {
   position: relative;
-  z-index: 3;
+  display: inline-block;
+}
+
+.product-img {
+  width: 320px;
+  border-radius: 15px;
+}
+
+/* 🔥 BUTTON ON IMAGE */
+.shop-btn {
+  position: absolute;
+  bottom: 20px;            /* 🔥 move to bottom */
+  left: 50%;               /* 🔥 center horizontally */
+  transform: translateX(-50%);
+  
+  padding: 10px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
   color: white;
+  background: rgba(46,125,50,0.95);
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+  transition: 0.3s;
 }
 
-.hero h1 {
-  font-size: 2.8rem;
-  font-weight: 800;
+.shop-btn:hover {
+  background: #2e7d32;
 }
 
-.hero p {
-  font-size: 1.1rem;
+.shop-btn:hover {
+  background: #2e7d32;
 }
 
 /* GRID */
 .uses-container {
   max-width: 1100px;
-  margin: auto;
-  padding: 20px;
+  margin: 50px auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* ✅ FIXED */
+  grid-template-columns: repeat(3, 1fr); /* ✅ 3 per row */
   gap: 25px;
-  justify-items: center;
+  padding: 20px;
 }
 
 /* CARD */
 .use-card {
-  background: white;
+  position: relative;
+  overflow: hidden;
   border-radius: 20px;
-  overflow: hidden; /* 🔥 IMPORTANT */
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  transition: 0.3s;
-  width: 100%;
-  max-width: 350px; /* slightly bigger */
-  padding: 0; /* ❌ remove padding */
-}
-
-.use-card:hover {
-  transform: translateY(-8px);
-}
-
-.use-card img {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 15px;
-}
-
-.use-card h3 {
-  margin-top: 10px;
-  font-size: 1.2rem;
-  font-weight: 700;
-}
-
-.use-card p {
-  font-size: 0.9rem;
-  color: #555;
-}
-
-/* BUY BUTTON */
-.buy-section {
-  text-align: center;
-  padding: 40px;
-}
-
-.buy-btn {
-  background: #4caf50;
-  color: white;
-  padding: 12px 30px;
-  border: none;
-  border-radius: 30px;
-  font-size: 1rem;
   cursor: pointer;
 }
 
+/* IMAGE */
+.use-card img {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  transition: 0.4s;
+}
+
+.use-card:hover img {
+  transform: scale(1.1);
+}
+
+/* OVERLAY */
+.overlay {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  padding: 18px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.9));
+  color: white;
+  text-align: center;
+}
+
+.overlay svg {
+  font-size: 20px;
+  margin-bottom: 5px;
+}
+
+.overlay h3 {
+  font-size: 1.2rem;
+}
+
+.overlay p {
+  font-size: 0.85rem;
+}
+
 /* MOBILE */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
+  .uses-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
   .uses-container {
     grid-template-columns: 1fr;
+  }
+
+  .title-section h1 {
+    font-size: 2rem;
+  }
+
+  .product-img {
+    width: 240px;
   }
 }
 
@@ -178,11 +235,11 @@ const navigate = useNavigate();
   );
 }
 
-/* 🔥 ALL USES DATA */
+/* DATA */
 const uses = [
   {
     title: "Salad Dressing",
-    desc: "Add lemon seed oil to salads for fresh flavor.",
+    desc: "Add lemon oil to salads for fresh flavor.",
     img: "/assets/images/oil_salad.png",
   },
   {
@@ -196,13 +253,13 @@ const uses = [
     img: "/assets/images/oil_skin.png",
   },
   {
-    title: "Hair Growth",
+    title: "Hair Care",
     desc: "Massage scalp for healthy hair.",
     img: "/assets/images/oil_hair.png",
   },
   {
     title: "Detox Drink",
-    desc: "Add drops to warm water with honey.",
+    desc: "Mix with warm water & honey.",
     img: "/assets/images/oil_detox.png",
   },
 ];
