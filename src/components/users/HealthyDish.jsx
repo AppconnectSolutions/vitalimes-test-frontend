@@ -56,22 +56,52 @@ const navigate = useNavigate();
       <style>{`
 
 .hero {
+  position: relative;
+  width: 100%;
+  height: 60vh; /* 🔥 banner height */
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
-  padding: 60px 20px 30px;
 }
 
 .hero-img {
-  width: 140px;
-  margin-bottom: 15px;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* 🔥 fills full screen */
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+/* overlay for text visibility */
+.hero::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  top: 0;
+  left: 0;
+  z-index: 2;
+}
+
+.hero h1,
+.hero p {
+  position: relative;
+  z-index: 3;
+  color: white;
 }
 
 .hero h1 {
-  font-size: 2.3rem;
+  font-size: 2.8rem;
   font-weight: 800;
 }
 
 .hero p {
-  color: #555;
+  font-size: 1.1rem;
 }
 
 /* GRID */
@@ -89,12 +119,13 @@ const navigate = useNavigate();
 .use-card {
   background: white;
   border-radius: 20px;
-  padding: 20px;
+  overflow: hidden; /* 🔥 IMPORTANT */
   text-align: center;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   transition: 0.3s;
-  max-width: 320px;
   width: 100%;
+  max-width: 350px; /* slightly bigger */
+  padding: 0; /* ❌ remove padding */
 }
 
 .use-card:hover {
