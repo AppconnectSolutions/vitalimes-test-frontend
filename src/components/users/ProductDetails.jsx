@@ -365,7 +365,7 @@ export default function ProductDetails() {
               return (
                 <Col md={3} sm={6} xs={6} className="mb-4" key={productId}>
                   <div
-                    className="p-3 border rounded"
+  className="p-3 border rounded d-flex flex-column h-100"
                     style={{ cursor: "pointer" }}
                     onClick={() => navigate(`/product/${productId}`)}
                   >
@@ -374,14 +374,16 @@ export default function ProductDetails() {
                       alt={p.title}
                       className="w-100"
                       style={{
-                        height: "200px",
+                        height: "220px",
                         objectFit: "cover",
                         borderRadius: "8px",
                       }}
                       onError={handleImgError}
                     />
 
-                    <h6 className="mt-3 fw-bold">{p.title}</h6>
+                    <h6 className="mt-3 fw-bold" style={{ minHeight: "48px" }}>
+  {p.title}
+</h6>
 
                     {p.variants?.length > 0 ? (
                       <p className="m-0 fw-bold">
@@ -392,7 +394,7 @@ export default function ProductDetails() {
                     )}
 
                     {/* Quantity buttons */}
-                    <div className="d-flex align-items-center mt-2">
+                    <div className="d-flex align-items-center justify-content-center mt-2">
                       <button
                         className="btn btn-dark"
                         onClick={(e) => {
@@ -415,8 +417,9 @@ export default function ProductDetails() {
                     </div>
 
                     {/* Add to Cart button */}
-                    <button
-                      className="btn btn-dark w-100 mt-2"
+                    <div className="mt-auto">
+  <button
+    className="btn btn-dark w-100 mt-2"
                       onClick={(e) => {
                         e.stopPropagation();
 
@@ -438,6 +441,7 @@ export default function ProductDetails() {
                     >
                       Add to Cart
                     </button>
+                    </div>
                   </div>
                 </Col>
               );
