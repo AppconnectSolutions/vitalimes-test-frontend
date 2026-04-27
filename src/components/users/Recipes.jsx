@@ -33,7 +33,7 @@ export default function Recipes() {
     },
     {
       img: `/assets/images/recepies/meat.png`,
-      title: "Lemon Seed Oil Dish",
+      title: "Lemon Essential Oil Dish",
       description: "A special dish made with organic oil",
       path: "/recipes/healthy-dish",
     },

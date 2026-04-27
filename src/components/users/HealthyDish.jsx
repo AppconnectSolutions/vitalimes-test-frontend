@@ -14,12 +14,12 @@ const navigate = useNavigate();
       {/* 🔥 HERO SECTION */}
       <div className="hero">
         <img
-          src="/assets/images/seed_oil_50ml.jpeg"
+          src="/assets/images/category_essential_oil.png"
           alt="Lemon Seed Oil"
           className="hero-img"
         />
 
-        <h1>Lemon Seed Oil</h1>
+        <h1>Lemon Essential Oil</h1>
         <p>
           Natural, versatile oil for food, skincare, haircare, and wellness.
         </p>
