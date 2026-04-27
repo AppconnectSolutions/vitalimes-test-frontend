@@ -197,7 +197,7 @@ useEffect(() => {
         <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
           <div className="container">
             {/* Logo */}
-            <Link to="/products" className="navbar-brand d-flex align-items-center me-3">
+            <Link to="/products" onClick={closeNavbar} className="navbar-brand d-flex align-items-center me-3">
               <img
                 src="/assets/images/vita_logo.svg"
                 alt="Vitalimes Logo"
@@ -243,6 +243,7 @@ useEffect(() => {
                     <NavLink
                       to={item.to}
                       end={item.to === "/"}
+                      onClick={closeNavbar}
                       className={({ isActive }) =>
                         "nav-link px-0 fw-semibold " +
                         (isActive ? "text-success" : "text-dark") +
@@ -271,6 +272,7 @@ useEffect(() => {
                {role === "admin" && (
                 <NavLink
                   to="/admin/dashboard"
+                  onClick={closeNavbar}
                   className="btn btn-sm px-3 fw-semibold text-dark border"
                   style={{
                     backgroundColor: "#fff3cd",
