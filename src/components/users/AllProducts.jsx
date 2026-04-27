@@ -94,7 +94,8 @@ export default function AllProducts() {
         .product-img-container { width: 100%; height: 330px; overflow: hidden; position: relative; border-bottom: 1px solid #ddd; }
         .product-img-container img { width: 100%; height: 100%; object-fit: cover; position: absolute; opacity: 0; transition: opacity 0.4s ease-in-out; }
         .product-img-container img.main-img { opacity: 1; }
-        .product-card:hover .hover-1 { opacity: 1; }
+        .product-card:hover .main-img { opacity: 0; }
+.product-card:hover .hover-1 { opacity: 1; }
         .product-card:hover .hover-2 { animation: fadeSlide 1.4s forwards 0.4s; }
         @keyframes fadeSlide { from { opacity: 0; } to { opacity: 1; } }
        .add-btn {
